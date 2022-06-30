@@ -14,6 +14,10 @@ namespace TrapTool
     {
         private const string nameDictionaryFileName = "trap_name_dictionary.txt";
         private const string dataSetDictionaryFileName = "trap_dataset_dictionary.txt";
+        private const string nameHashListFileName = "trap_name_hashes.txt";
+        private const string dataSetHashListFileName = "trap_dataset_hashes.txt";
+        public static List<uint> nameHashList = new List<uint>();
+        public static List<uint> dataSetHashList = new List<uint>();
         static void Main(string[] args)
         {
             var hashManager = new HashManager();
@@ -21,11 +25,34 @@ namespace TrapTool
             var nameDictionaryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/" + nameDictionaryFileName;
             var dataSetDictionaryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/" + dataSetDictionaryFileName;
 
+            var nameHashListFilePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/" + nameHashListFileName;
+            var dataSetHashListFilePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/" + dataSetHashListFileName;
+
             // Read hash dictionaries
             if (File.Exists(nameDictionaryPath))
                 hashManager.StrCode32LookupTable = MakeHashLookupTableFromFile(nameDictionaryPath, FoxHash.Type.StrCode32);
             if (File.Exists(dataSetDictionaryPath))
                 hashManager.PathCode32LookupTable = MakeHashLookupTableFromFile(dataSetDictionaryPath, FoxHash.Type.PathCode32);
+
+            if (File.Exists(dataSetHashListFilePath))
+            {
+                var readStringList = MakeListFromFile(dataSetHashListFilePath);
+                foreach (string line in readStringList)
+                    if (uint.TryParse(line, out uint hash))
+                        if (!dataSetHashList.Contains(hash))
+                            dataSetHashList.Add(hash);
+            }
+            if (File.Exists(nameHashListFilePath))
+            {
+                var readStringList = MakeListFromFile(nameHashListFilePath);
+                foreach (string line in readStringList)
+                    if (uint.TryParse(line, out uint hash))
+                        if (!nameHashList.Contains(hash))
+                            nameHashList.Add(hash);
+            }
+
+            dataSetHashList.Sort();
+            nameHashList.Sort();
 
             foreach (var arg in args)
             {
@@ -42,6 +69,23 @@ namespace TrapTool
                         throw new IOException("Unrecognized input type.");
                 }
             }
+
+            dataSetHashList.Sort();
+            nameHashList.Sort();
+
+            List<string> dataSetHashStringList = new List<string>();
+            foreach (uint hash in dataSetHashList)
+                if (!dataSetHashStringList.Contains(hash.ToString()))
+                    dataSetHashStringList.Add(hash.ToString());
+
+            List<string> nameHashStringList = new List<string>();
+            foreach (uint hash in nameHashList)
+                if (!nameHashStringList.Contains(hash.ToString()))
+                    nameHashStringList.Add(hash.ToString());
+
+            WriteListToFile(dataSetHashListFilePath, dataSetHashStringList);
+            WriteListToFile(nameHashListFilePath, nameHashStringList);
+
             //Console.Read(); //DEBUG Hold onscreen
         }
         public static void ReadTrap(string trapPath, HashManager hashManager)
@@ -57,7 +101,25 @@ namespace TrapTool
             {
                 trap.Read(reader, hashManager);
             }
+
+            Tuple<uint,List<uint>> dumpedHashList = GetHashesFromTrap(trap);
+            uint dataSetName = dumpedHashList.Item1;
+            List<uint> nameHashList = dumpedHashList.Item2;
+            dataSetHashList.Add(dataSetName);
+            foreach (uint nameHash in nameHashList)
+                Program.nameHashList.Add(nameHash);
+
             return trap;
+        }
+        private static Tuple<uint, List<uint>> GetHashesFromTrap(TrapFile trap)
+        {
+            uint dataSetStringList = trap.DataSet.HashValue;
+            List<uint> nameStringList = new List<uint>();
+            foreach (TrapEntry entry in trap.Entries)
+            {
+                nameStringList.Add(entry.Name.HashValue);
+            }
+            return Tuple.Create(dataSetStringList, nameStringList);
         }
         public static void WriteToXml(TrapFile trap, string path)
         {
@@ -97,24 +159,30 @@ namespace TrapTool
                 trap.Write(writer);
             }
         }
-        /// <summary>
-        /// Opens a file containing one string per line, hashes each string, and adds each pair to a lookup table.
-        /// </summary>
-        private static Dictionary<uint, string> MakeHashLookupTableFromFile(string path, FoxHash.Type hashType)
+        private static List<string> MakeListFromFile(string path)
         {
-            ConcurrentDictionary<uint, string> table = new ConcurrentDictionary<uint, string>();
-
             // Read file
-            List<string> stringLiterals = new List<string>();
+            List<string> stringList = new List<string>();
             using (StreamReader file = new StreamReader(path))
             {
                 // TODO multi-thread
                 string line;
                 while ((line = file.ReadLine()) != null)
                 {
-                    stringLiterals.Add(line);
+                    stringList.Add(line);
                 }
             }
+            return stringList;
+        }
+        /// <summary>
+        /// Opens a file containing one string per line, hashes each string, and adds each pair to a lookup table.
+        /// </summary>
+        /// 
+        private static Dictionary<uint, string> MakeHashLookupTableFromFile(string path, FoxHash.Type hashType)
+        {
+            ConcurrentDictionary<uint, string> table = new ConcurrentDictionary<uint, string>();
+
+            List<string> stringLiterals = MakeListFromFile(path);
 
             // Hash entries
             Parallel.ForEach(stringLiterals, (string entry) =>
@@ -132,6 +200,16 @@ namespace TrapTool
             });
 
             return new Dictionary<uint, string>(table);
+        }
+        private static void WriteListToFile(string path, List<string> hashList)
+        {
+            using (StreamWriter file = new StreamWriter(path))
+            {
+                foreach (string line in hashList)
+                {
+                    file.WriteLine(line);
+                }
+            }
         }
 
     }
