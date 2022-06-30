@@ -42,7 +42,7 @@ namespace TrapTool
                         throw new IOException("Unrecognized input type.");
                 }
             }
-            Console.Read(); //DEBUG Hold onscreen
+            //Console.Read(); //DEBUG Hold onscreen
         }
         public static void ReadTrap(string trapPath, HashManager hashManager)
         {
