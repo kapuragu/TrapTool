@@ -11,67 +11,67 @@ Definitions
 --------
 Tags enum:
 
-1 = Intrude
+0 = Intrude
 
-2 = Tower
+1 = Tower
 
-3 = InRoom
+2 = InRoom
 
-4 = FallDeath
-
-
-5 = NearCamera1
-
-6 = NearCamera2
-
-7 = NearCamera3
-
-8 = NearCamera4
+3 = FallDeath
 
 
-9 = 0x9978c8d36f7
+4 = NearCamera1
 
-10 = NoRainEffect
+5 = NearCamera2
 
-11 = 0x60e79a58dcc3
+6 = NearCamera3
 
-12 = GimmickNoFulton
-
-
-13 = innerZone
-
-14 = outerZone
-
-15 = hotZone
-
-16 = 0x439898dcbf83
+7 = NearCamera4
 
 
-17 = 0xe780e431a068
+8 = 0x9978c8d36f7
 
-18 = 0x53827eed3fbc
+9 = NoRainEffect
 
-19 = 0x7e1121c5cb93
+10 = 0x60e79a58dcc3
 
-20 = 0xcadd57b76a83
-
-
-21 = 0xe689072c4df8
-
-22 = 0x6d14396ebbe5
-
-23 = 0xd1ee7dc34fff
-
-24 = 0xb07e254afcae
+11 = GimmickNoFulton
 
 
-25 = 0xd6ee65d20b7a
+12 = innerZone
 
-26 = 0xf287ba9cb7e3
+13 = outerZone
 
-27 = NoFulton
+14 = hotZone
 
-28 = 0x24330b0e33cb
+15 = 0x439898dcbf83
+
+
+16 = 0xe780e431a068
+
+17 = 0x53827eed3fbc
+
+18 = 0x7e1121c5cb93
+
+19 = 0xcadd57b76a83
+
+
+20 = 0xe689072c4df8
+
+21 = 0x6d14396ebbe5
+
+22 = 0xd1ee7dc34fff
+
+23 = 0xb07e254afcae
+
+
+24 = 0xd6ee65d20b7a
+
+25 = 0xf287ba9cb7e3
+
+26 = NoFulton
+
+27 = 0x24330b0e33cb
 
 
 Requirements
