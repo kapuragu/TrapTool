@@ -183,7 +183,7 @@ namespace TrapTool
         {
             TrapFile trap = ReadFromXml(trapPath);
             CollectUserStrings(trap, hashManager, dataSetCustomDictionary, nameCustomDictionary);
-            WriteToBinary(trap, Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(trapPath)) + ".trap");
+            WriteToBinary(trap, Path.GetFileNameWithoutExtension(trapPath) + ".trap");
         }
         public static TrapFile ReadFromXml(string trapPath)
         {
